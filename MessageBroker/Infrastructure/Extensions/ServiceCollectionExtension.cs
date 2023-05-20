@@ -17,5 +17,6 @@ public static class ServiceCollectionExtension
     public static IServiceCollection AddRequestModelsValidators(this IServiceCollection services)
             => services
                 .AddScoped<IValidator<TopicRequestModel>, TopicRequestModelValidator>()
-                .AddScoped<IValidator<MessageRequestModel>, MessageRequestModelValidator>();
+                .AddScoped<IValidator<MessageRequestModel>, MessageRequestModelValidator>()
+                .AddScoped<IValidator<SubscriptionRequestModel>, SubscriptionRequestModelValidator>();
 }
