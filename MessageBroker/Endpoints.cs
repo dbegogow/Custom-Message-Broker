@@ -71,5 +71,21 @@ public static class Endpoints
 
                 return Results.Ok("Message has been published");
             });
+
+            endpoints.MapPost("api/topics/{id}/subscriptions", async (AppDbContext data, int id) =>
+            {
+                var isTopicExist = await data.Topics
+                    .AnyAsync(t => t.Id == id);
+
+                if (!isTopicExist)
+                    return Results.NotFound("Topic not found");
+
+                var newSub = new Subscription { TopicId = id };
+
+                await data.Subscriptions.AddAsync(newSub);
+                await data.SaveChangesAsync();
+
+                return Results.Created($"api/topics/{id}/subscriptions/{newSub.Id}", newSub);
+            });
         });
 }
