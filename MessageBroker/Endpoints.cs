@@ -37,41 +37,39 @@ public static class Endpoints
                 IValidator<MessageRequestModel> validator,
                 int id,
                 MessageRequestModel message) =>
+            {
+                var validationResult = await validator.ValidateAsync(message);
+
+                if (!validationResult.IsValid)
+                    return Results.ValidationProblem(validationResult.ToDictionary());
+
+                var isTopicExist = await data.Topics
+                    .AnyAsync(t => t.Id == id);
+
+                if (!isTopicExist)
+                    return Results.NotFound("Topic not found");
+
+                var subs = await data.Subscriptions
+                .Where(s => s.TopicId == id)
+                .ToListAsync();
+
+                if (subs.Count == 0)
+                    return Results.NotFound("There are no subscriptions for this topic");
+
+                foreach (var sub in subs)
                 {
-                    var validationResult = await validator.ValidateAsync(message);
-
-                    if (!validationResult.IsValid)
-                        return Results.ValidationProblem(validationResult.ToDictionary());
-
-                    var isTopicExist = await data.Topics
-                        .AnyAsync(t => t.Id == id);
-
-                    if (!isTopicExist)
-                        return Results.NotFound("Topic not found");
-
-                    var subs = await data.Subscriptions
-                    .Where(s => s.TopicId == id)
-                    .ToListAsync();
-
-                    if (subs.Count == 0)
-                        return Results.NotFound("There are no subscriptions for this topic");
-
-                    foreach (var sub in subs)
+                    var newMessage = new Message
                     {
-                        var newMessage = new Message
-                        {
-                            TopicMessage = message.TopicMessage,
-                            SubscriptionId = sub.Id,
-                            ExpiresAfter = message.ExpiresAfter,
-                            MessageStatus = message.MessageStatus
-                        };
+                        TopicMessage = message.TopicMessage,
+                        SubscriptionId = sub.Id
+                    };
 
-                        await data.Messages.AddAsync(newMessage);
-                    }
+                    await data.Messages.AddAsync(newMessage);
+                }
 
-                    await data.SaveChangesAsync();
+                await data.SaveChangesAsync();
 
-                    return Results.Ok("Message has been published");
-                });
+                return Results.Ok("Message has been published");
+            });
         });
 }
