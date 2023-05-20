@@ -1,3 +1,4 @@
+using MessageBroker;
 using MessageBroker.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,5 +11,7 @@ builder.Services
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+
+app.RegisterEndpoints();
 
 app.Run();
