@@ -1,10 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace MessageBroker.Models.Request;
+﻿namespace MessageBroker.Models.Request;
 
 public class MessageRequestModel
 {
-    [Required]
     public string TopicMessage { get; init; }
 
     public int SubscriptionId { get; init; }
