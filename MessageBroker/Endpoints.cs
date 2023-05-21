@@ -100,5 +100,39 @@ public static class Endpoints
 
                 return Results.Created($"api/topics/{id}/subscriptions/{newSub.Id}", newSub);
             });
+
+            endpoints.MapGet("api/subscriptions/{id}/messages", async (AppDbContext data, int id) =>
+            {
+                var isSubExist = await data.Subscriptions
+                    .AnyAsync(s => s.Id == id);
+
+                if (!isSubExist)
+                    return Results.NotFound("Subscription not found");
+
+                var messages = await data.Messages
+                    .Where(m => m.SubscriptionId == id && m.MessageStatus != "SENT")
+                    .ToListAsync();
+
+                if (messages.Count == 0)
+                    return Results.NotFound("No new messages");
+
+                messages.ForEach(m => m.MessageStatus = "REQUESTED");
+
+                await data.SaveChangesAsync();
+
+                return Results.Ok(messages);
+            });
+
+            endpoints.MapPost("api/subscriptions/{id}/messages", async (
+                AppDbContext data,
+                int id,
+                int[] confs) =>
+            {
+                var isSubExist = await data.Subscriptions
+                    .AnyAsync(s => s.Id == id);
+
+                if (!isSubExist)
+                    return Results.NotFound("Subscription not found");
+            });
         });
 }
