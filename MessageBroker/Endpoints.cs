@@ -128,7 +128,7 @@ public static class Endpoints
                 int id,
                 int[] confs) =>
             {
-                if (confs.Length <= 0)
+                if (confs == null || !confs.Any())
                     return Results.BadRequest();
 
                 var isSubExist = await data.Subscriptions
