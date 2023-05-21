@@ -128,11 +128,32 @@ public static class Endpoints
                 int id,
                 int[] confs) =>
             {
+                if (confs.Length <= 0)
+                    return Results.BadRequest();
+
                 var isSubExist = await data.Subscriptions
                     .AnyAsync(s => s.Id == id);
 
                 if (!isSubExist)
                     return Results.NotFound("Subscription not found");
+
+                var count = 0;
+                foreach (var conf in confs)
+                {
+                    var message = await data.Messages
+                        .FirstOrDefaultAsync(m => m.Id == conf);
+
+                    if (message != null)
+                    {
+                        message.MessageStatus = "SENT";
+
+                        await data.SaveChangesAsync();
+
+                        count++;
+                    }
+                }
+
+                return Results.Ok($"Acknowledged {count}/{confs.Length} messages");
             });
         });
 }

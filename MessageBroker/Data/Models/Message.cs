@@ -5,7 +5,7 @@ namespace MessageBroker.Data.Models;
 public class Message
 {
     [Key]
-    public int Key { get; init; }
+    public int Id { get; init; }
 
     [Required]
     public string TopicMessage { get; set; }
